@@ -9,11 +9,14 @@ export class AuthGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         try {
             const token = request.cookies.causalfunnel;
-            var decoded = jwt.verify(token, 'causalfunnel');
-            const userId = decoded.id;
-            const user = await User.findOne({ where: { id: userId } });
-            if (user) {
-                return true;
+            if (token) {
+                var decoded = jwt.verify(token, 'causalfunnel');
+                const userId = decoded.id;
+                const user = await User.findOne({ where: { id: userId } });
+                if (user) {
+                    return true;
+                }
+                return false;
             }
             return false;
         } catch (error) {

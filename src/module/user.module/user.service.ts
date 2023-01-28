@@ -50,7 +50,7 @@ export class UserService {
                 delete user.password;
                 response.cookie('causalfunnel', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
 
-                return { user, accessToken: token, success: true };
+                return { user, success: true };
             }
             else throw new HttpException('Invalid email or password', 400);
         } catch (error) {

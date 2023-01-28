@@ -17,6 +17,5 @@ export interface Success {
 
 export interface Login {
     user: User;
-    accessToken: string;
     success: boolean;
 }

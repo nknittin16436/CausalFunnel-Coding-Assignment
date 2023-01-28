@@ -10,10 +10,12 @@ export interface UpdateBlog {
     description: string;
 }
 
-
-
 export interface GetBlogs {
     blogs: Blog[];
     success: boolean;
 }
 
+export interface BlogSuccess {
+    success: boolean;
+    message: string;
+}
