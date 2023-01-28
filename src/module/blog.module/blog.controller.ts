@@ -7,10 +7,7 @@ import { BlogService } from './blog.service';
 export class BlogController {
     constructor(private readonly blogService: BlogService) { }
 
-    @Get('')
-    getBlogs(@Query('page') page: number): Promise<GetBlogs> {
-        return this.blogService.getAllBlogs(page);
-    }
+    
 
 
     @UseGuards(AuthGuard)

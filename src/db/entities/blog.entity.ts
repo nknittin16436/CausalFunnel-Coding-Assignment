@@ -11,6 +11,6 @@ export class Blog extends BaseEntity {
     description: string
 
     @Column()
-    createdAt: string
+    createdAt: number
 
 }

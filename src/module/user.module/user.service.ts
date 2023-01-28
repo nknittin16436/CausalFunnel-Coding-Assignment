@@ -5,6 +5,7 @@ import * as bcrypt from 'bcryptjs';
 import { LoginSchema, SignUpSchema } from 'src/JoiSchema/JoiSchema';
 import { CreateUser, Login, LoginUser, Success, } from 'src/dtos/user.dto';
 import { getInsensitiveEmail } from 'src/dtos/UtilityFunction';
+import { Response } from 'express';
 
 @Injectable()
 export class UserService {
@@ -35,7 +36,7 @@ export class UserService {
     }
 
 
-    async doUserLogin(loginData: LoginUser): Promise<Login> {
+    async doUserLogin(loginData: LoginUser, response: Response): Promise<Login> {
         try {
             try {
                 await LoginSchema.validateAsync({ email: loginData.email, password: loginData.password });
@@ -47,6 +48,8 @@ export class UserService {
             if (user && bcrypt.compareSync(loginData.password, user.password)) {
                 const token = jwt.sign({ id: user.id, time: Date.now() }, 'causalfunnel', { expiresIn: '24h' });
                 delete user.password;
+                response.cookie('causalfunnel', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+
                 return { user, accessToken: token, success: true };
             }
             else throw new HttpException('Invalid email or password', 400);

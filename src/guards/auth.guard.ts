@@ -8,18 +8,17 @@ export class AuthGuard implements CanActivate {
     ): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
         try {
-            const token = request.cookies;
-            console.log(token);
-            // var decoded = jwt.verify(token, 'bikeReservation');
-            // const userId = decoded.id;
-            // const user = await User.findOne({ where: { id: userId } });
-            // if (user) {
-            // }
-            return true;
+            const token = request.cookies.causalfunnel;
+            var decoded = jwt.verify(token, 'causalfunnel');
+            const userId = decoded.id;
+            const user = await User.findOne({ where: { id: userId } });
+            if (user) {
+                return true;
+            }
             return false;
         } catch (error) {
 
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('Please login to access this resource');
         }
     }
 }

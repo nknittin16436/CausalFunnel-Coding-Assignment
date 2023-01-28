@@ -8,7 +8,7 @@ const pageSize = 10;
 @Injectable()
 export class BlogService {
 
-    async getAllBlogs(page: number | 1): Promise<GetBlogs> {
+    async getAllBlogs(page: number = 1): Promise<GetBlogs> {
         try {
 
             const blogs: Blog[] = await Blog.find();
@@ -23,14 +23,15 @@ export class BlogService {
 
     async createBlog(createBlogData: CreateBlog): Promise<Success> {
         try {
-            try {
-                await AddBlogSchema.validateAsync({ title: createBlogData.title.trim(), description: createBlogData.description.trim() });
-            } catch (error) {
-                throw new HttpException(error.message, 400);
-            }
+            // try {
+            //     await AddBlogSchema.validateAsync({ title: createBlogData.title.trim(), description: createBlogData.description.trim() });
+            // } catch (error) {
+            //     throw new HttpException(error.message, 400);
+            // }
             const blog = new Blog();
             blog.title = createBlogData.title.trim();
             blog.description = createBlogData.description.trim();
+            blog.createdAt = Date.now();
             await blog.save();
             // console.log(blog);
             return { success: true };
@@ -43,7 +44,7 @@ export class BlogService {
 
     async updateBlog(id: string, updateBlogData: UpdateBlog): Promise<Success> {
         try {
-            await validateBlogUpdateData(updateBlogData);
+            // await validateBlogUpdateData(updateBlogData);
             const blog: Blog | null = await Blog.findOne({
                 where: { id: id }
             }

@@ -5,6 +5,8 @@ import { UserController } from './module/user.module/user.controller';
 import { UserService } from './module/user.module/user.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { BlogController } from './module/blog.module/blog.controller';
+import { BlogService } from './module/blog.module/blog.service';
 
 // @Module({
 //   imports: [TypeOrmModule.forRoot({
@@ -30,7 +32,7 @@ import { ConfigModule } from '@nestjs/config';
     entities: [__dirname + "/**/*.entity{.ts,.js}"],
     synchronize: true
   })],
-  controllers: [AppController, UserController],
-  providers: [AppService, UserService],
+  controllers: [ UserController,BlogController],
+  providers: [ UserService,BlogService],
 })
 export class AppModule { }
