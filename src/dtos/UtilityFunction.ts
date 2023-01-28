@@ -1,5 +1,6 @@
 import { UpdateBlog } from "./blog.dto";
 import * as  crypto from 'crypto';
+import * as nodemailer from 'nodemailer';
 
 import { DescriptionSchema, TitleSchema } from "src/JoiSchema/JoiSchema";
 
@@ -26,4 +27,33 @@ export const getResetPasswordToken = (): string => {
     const resetToken: string = crypto.randomBytes(20).toString('hex');
 
     return resetToken;
+}
+
+
+
+
+export const sendEmail = async (recipient: string, subject: string, url: string) => {
+
+    try {
+        const transporter = nodemailer.createTransport({
+            host: process.env.MAILER_HOST,
+            port: process.env.MAILER_PORT,
+            auth: {
+                user: process.env.MAILER_EMAIL,
+                pass: process.env.MAILER_PASSWORD
+            }
+        });
+
+        const mailOptions = {
+            from: `"Causal Funnel" <${process.env.MAILER_EMAIL}>`,
+            to: recipient,
+            subject: subject,
+            text: url
+        };
+
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.log(error)
+    }
+
 }

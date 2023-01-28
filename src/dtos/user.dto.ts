@@ -13,6 +13,7 @@ export interface LoginUser {
 
 export interface Success {
     success: boolean;
+    message: string;
 }
 
 export interface Login {

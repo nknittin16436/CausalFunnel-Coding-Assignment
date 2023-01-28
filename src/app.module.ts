@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { UserController } from './module/user.module/user.controller';
 import { UserService } from './module/user.module/user.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
 import { BlogController } from './module/blog.module/blog.controller';
 import { BlogService } from './module/blog.module/blog.service';
 
@@ -28,7 +27,7 @@ import { BlogService } from './module/blog.module/blog.service';
 @Module({
   imports: [TypeOrmModule.forRoot({
     type: "sqlite",
-    database: "restaurantReview.db",
+    database: "causalfunnel.db",
     entities: [__dirname + "/**/*.entity{.ts,.js}"],
     synchronize: true
   })],

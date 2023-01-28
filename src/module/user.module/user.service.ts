@@ -6,8 +6,7 @@ import { LoginSchema, SignUpSchema } from 'src/JoiSchema/JoiSchema';
 import { CreateUser, Login, LoginUser, Success, } from 'src/dtos/user.dto';
 import { getInsensitiveEmail, getResetPasswordToken } from 'src/dtos/UtilityFunction';
 import { Request, Response } from 'express';
-import { sendEmail } from 'src/dtos/EmailSender';
-import * as  crypto from 'crypto';
+import { sendEmail } from 'src/dtos/UtilityFunction';
 
 
 @Injectable()
@@ -40,7 +39,7 @@ export class UserService {
             const hashedPassword: string = await bcrypt.hashSync(createUserData.password, 10);
             user.password = hashedPassword;
             await user.save();
-            return { success: true };
+            return { success: true, message: "User created succesfully" };
         } catch (error) {
             throw new HttpException(error, error.status);
         }
@@ -57,9 +56,9 @@ export class UserService {
             const insensitiveEmail = getInsensitiveEmail(loginData.email)
             const user = await User.findOne({ where: { email: insensitiveEmail } });
             if (user && bcrypt.compareSync(loginData.password, user.password)) {
-                const token = jwt.sign({ id: user.id, time: Date.now() }, 'causalfunnel', { expiresIn: '24h' });
+                const token = jwt.sign({ id: user.id, time: Date.now() }, process.env.JWT_SECRET, { expiresIn: '24h' });
                 delete user.password;
-                response.cookie('causalfunnel', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+                response.cookie(process.env.COOKIE_NAME, token, { httpOnly: true, maxAge: Number(process.env.COOKIE_EXPIRE) });
 
                 return { user, success: true };
             }
@@ -85,15 +84,19 @@ export class UserService {
             await user.save();
 
 
-            const resetPasswordUrl = `${req.protocol}://${req.get("host")}/password/reset/${resetToken}`;  //temporarily hardcodein url 
+            const resetPasswordUrl = `${req.protocol}://${req.get("host")}/password/reset/${resetToken}`;
             const message = `Your password reset link is \n\n  click to reset password \n ${resetPasswordUrl} \n\n If you have not requested this email then please igore it.`;
 
-            await sendEmail(email, "Forgot password request", message);
+            await sendEmail(email, "Forgot password request | CAUSAL FUNNEL", message);
+            return { success: true, message: `Check your Inbox We've sent an Reset Password Email to Mail Id ${email}` }
         } catch (error) {
             console.log(error)
-            user.resetPasswordToken = null;
-            user.resetPasswordExpire = null;
-            await user.save();
+            if (user) {
+
+                user.resetPasswordToken = null;
+                user.resetPasswordExpire = null;
+                await user.save();
+            }
             throw new HttpException(error.message, error.status);
         }
     }
@@ -101,29 +104,37 @@ export class UserService {
 
     async resetPassword(token: string, password: string, confirmPassword: string): Promise<any> {
 
-        const user = await User.findOne({
-            where: { resetPasswordToken: token }
-        });
-        console.log(user, token)
+        try {
 
-        //if user does not exist
-        if (!user) {
-            throw new HttpException('Reset password token is invalid or has been expired', 400);
+            const user = await User.findOne({
+                where: { resetPasswordToken: token }
+            });
+
+            //if user does not exist
+            if (!user) {
+                throw new HttpException('Reset password token is invalid', 400);
+            }
+            if (user.resetPasswordExpire && user.resetPasswordExpire < Date.now()) {
+
+                throw new HttpException('Reset Password Token Expired', 400);
+            }
+            //confirm password
+            if (password != confirmPassword) {
+                throw new HttpException('Password and Confirm Pasword does not match', 400);
+            }
+            const hashedPassword: string = await bcrypt.hashSync(password, 10);
+
+            user.password = hashedPassword;
+            user.resetPasswordToken = null;
+            user.resetPasswordExpire = null;
+
+
+            await user.save();
+            return { success: true, message: "Password updated succesfully" }
+        } catch (error) {
+            throw new HttpException(error.message, error.status);
+
         }
-
-        //confirm password
-        if (password != confirmPassword) {
-            throw new HttpException('Password and Confirm Pasword does not match', 400);
-        }
-        console.log("password matched")
-        const hashedPassword: string = await bcrypt.hashSync(password, 10);
-
-        user.password = hashedPassword;
-        user.resetPasswordToken = null;
-        user.resetPasswordExpire = null;
-
-
-        await user.save();
     }
 
 
