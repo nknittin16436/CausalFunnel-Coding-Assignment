@@ -1,4 +1,5 @@
 import { UpdateBlog } from "./blog.dto";
+import * as  crypto from 'crypto';
 
 import { DescriptionSchema, TitleSchema } from "src/JoiSchema/JoiSchema";
 
@@ -17,4 +18,12 @@ export const getInsensitiveEmail = (email: string): string => {
     const insensitiveEmail: string = email.slice(0, email.indexOf("@")).toLowerCase() +
         email.slice(email.indexOf("@"));
     return insensitiveEmail;
+}
+
+export const getResetPasswordToken = (): string => {
+
+    //GENERATING TOKEN
+    const resetToken: string = crypto.randomBytes(20).toString('hex');
+
+    return resetToken;
 }

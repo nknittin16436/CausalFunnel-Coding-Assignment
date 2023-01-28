@@ -4,11 +4,22 @@ import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
 import { LoginSchema, SignUpSchema } from 'src/JoiSchema/JoiSchema';
 import { CreateUser, Login, LoginUser, Success, } from 'src/dtos/user.dto';
-import { getInsensitiveEmail } from 'src/dtos/UtilityFunction';
-import { Response } from 'express';
+import { getInsensitiveEmail, getResetPasswordToken } from 'src/dtos/UtilityFunction';
+import { Request, Response } from 'express';
+import { sendEmail } from 'src/dtos/EmailSender';
+import * as  crypto from 'crypto';
+
 
 @Injectable()
 export class UserService {
+    async getUsers(): Promise<any> {
+        try {
+            const users = await User.find();
+            return { users };
+        } catch (error) {
+            throw new HttpException(error, error.status);
+        }
+    }
 
 
     async createUser(createUserData: CreateUser): Promise<Success> {
@@ -57,6 +68,62 @@ export class UserService {
             console.log(error)
             throw new HttpException(error.message, error.status);
         }
+    }
+
+
+    async forgotPassword(req: Request, email: string): Promise<any> {
+        const user: User | null = await User.findOne({ where: { email: email } });
+        try {
+            if (!user) {
+                throw new HttpException('User not found with Email Id', 400);
+            }
+
+            const resetToken: string = getResetPasswordToken();
+
+            user.resetPasswordToken = resetToken;
+            user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+            await user.save();
+
+
+            const resetPasswordUrl = `${req.protocol}://${req.get("host")}/password/reset/${resetToken}`;  //temporarily hardcodein url 
+            const message = `Your password reset link is \n\n  click to reset password \n ${resetPasswordUrl} \n\n If you have not requested this email then please igore it.`;
+
+            await sendEmail(email, "Forgot password request", message);
+        } catch (error) {
+            console.log(error)
+            user.resetPasswordToken = null;
+            user.resetPasswordExpire = null;
+            await user.save();
+            throw new HttpException(error.message, error.status);
+        }
+    }
+
+
+    async resetPassword(token: string, password: string, confirmPassword: string): Promise<any> {
+
+        const user = await User.findOne({
+            where: { resetPasswordToken: token }
+        });
+        console.log(user, token)
+
+        //if user does not exist
+        if (!user) {
+            throw new HttpException('Reset password token is invalid or has been expired', 400);
+        }
+
+        //confirm password
+        if (password != confirmPassword) {
+            throw new HttpException('Password and Confirm Pasword does not match', 400);
+        }
+        console.log("password matched")
+        const hashedPassword: string = await bcrypt.hashSync(password, 10);
+
+        user.password = hashedPassword;
+        user.resetPasswordToken = null;
+        user.resetPasswordExpire = null;
+
+
+        await user.save();
     }
 
 

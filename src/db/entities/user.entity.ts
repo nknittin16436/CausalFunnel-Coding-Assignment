@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity,OneToMany ,JoinTable} from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, JoinTable } from "typeorm"
 @Entity()
 export class User extends BaseEntity {
     @PrimaryGeneratedColumn("uuid")
@@ -7,10 +7,16 @@ export class User extends BaseEntity {
     @Column()
     name: string
 
-    @Column({nullable:false,unique:true})
+    @Column({ nullable: false, unique: true })
     email: string
 
     @Column()
     password: string
+
+    @Column({ nullable: true })
+    resetPasswordToken: string
+
+    @Column({ nullable: true })
+    resetPasswordExpire: number
 
 }
