@@ -11,14 +11,6 @@ import { sendEmail } from 'src/dtos/UtilityFunction';
 
 @Injectable()
 export class UserService {
-    async getUsers(): Promise<any> {
-        try {
-            const users = await User.find();
-            return { users };
-        } catch (error) {
-            throw new HttpException(error, error.status);
-        }
-    }
 
 
     async createUser(createUserData: CreateUser): Promise<Success> {
@@ -70,7 +62,7 @@ export class UserService {
     }
 
 
-    async forgotPassword(req: Request, email: string): Promise<any> {
+    async forgotPassword(req: Request, email: string): Promise<Success> {
         const user: User | null = await User.findOne({ where: { email: email } });
         try {
             if (!user) {
@@ -84,11 +76,15 @@ export class UserService {
             await user.save();
 
 
-            const resetPasswordUrl = `${req.protocol}://${req.get("host")}/password/reset/${resetToken}`;
-            const message = `Your password reset link is \n\n  click to reset password \n ${resetPasswordUrl} \n\n If you have not requested this email then please igore it.`;
+            const resetPasswordUrl: string = `${req.protocol}://${req.get("host")}/password/reset/${resetToken}`;
+            const message: string = `Your password reset link is \n\n  click to reset password \n ${resetPasswordUrl} \n\n If you have not requested this email then please igore it.`;
 
-            await sendEmail(email, "Forgot password request | CAUSAL FUNNEL", message);
-            return { success: true, message: `Check your Inbox We've sent an Reset Password Email to Mail Id ${email}` }
+            const mailResponse: boolean = await sendEmail(email, "Forgot password request | CAUSAL FUNNEL", message);
+            if (mailResponse) {
+                return { success: true, message: `Check your Inbox We've sent an Reset Password Email to Mail Id ${email}` }
+            }
+            else throw new HttpException('Unable to send Email ', 500);
+
         } catch (error) {
             console.log(error)
             if (user) {
@@ -102,11 +98,11 @@ export class UserService {
     }
 
 
-    async resetPassword(token: string, password: string, confirmPassword: string): Promise<any> {
+    async resetPassword(token: string, password: string, confirmPassword: string): Promise<Success> {
 
         try {
 
-            const user = await User.findOne({
+            const user: User | null = await User.findOne({
                 where: { resetPasswordToken: token }
             });
 
@@ -122,6 +118,7 @@ export class UserService {
             if (password != confirmPassword) {
                 throw new HttpException('Password and Confirm Pasword does not match', 400);
             }
+
             const hashedPassword: string = await bcrypt.hashSync(password, 10);
 
             user.password = hashedPassword;
@@ -137,5 +134,13 @@ export class UserService {
         }
     }
 
+    async getUsers(): Promise<any> {
+        try {
+            const users = await User.find();
+            return { users };
+        } catch (error) {
+            throw new HttpException(error, error.status);
+        }
+    }
 
 }

@@ -32,7 +32,7 @@ export const getResetPasswordToken = (): string => {
 
 
 
-export const sendEmail = async (recipient: string, subject: string, url: string) => {
+export const sendEmail = async (recipient: string, subject: string, url: string): Promise<boolean> => {
 
     try {
         const transporter = nodemailer.createTransport({
@@ -52,8 +52,10 @@ export const sendEmail = async (recipient: string, subject: string, url: string)
         };
 
         await transporter.sendMail(mailOptions);
+        return true;
     } catch (error) {
         console.log(error)
+        return false;
     }
 
 }

@@ -11,9 +11,6 @@ export class UserController {
         private readonly blogService: BlogService
     ) { }
 
-
-
-
     @Get('/users')
     getUsers(): Promise<any> {
         return this.userService.getUsers();
