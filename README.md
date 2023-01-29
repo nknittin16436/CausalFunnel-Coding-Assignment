@@ -1,4 +1,69 @@
 
+# Causal Assignment
+
+Build the RestAPI for a BlogPost Application using NestJs and Sqlite3 as Databse using Typeorm.
+You can reset your password by using forgot password endpoint and then you will receive a Email with reset password link and then you can change your password.
+
+
+
+## Installation
+
+```bash
+$ npm install
+```
+
+## Environment Variables
+
+To run this project, you will need to add the following environment variables to your .env file
+
+`PORT`
+
+`JWT_SECRET`
+
+`COOKIE_EXPIRE`
+
+`COOKIE_NAME`
+
+`MYSQL_ROOT_PASSWORD`
+
+`MYSQL_DATABASE`
+
+`MYSQL_LOCAL_PORT`
+
+`MYSQL_DOCKER_PORT`
+
+`NODE_LOCAL_PORT`
+
+`NODE_DOCKER_PORT`
+
+`MAILER_HOST`
+
+`MAILER_PORT`
+
+`MAILER_EMAIL`
+
+`MAILER_PASSWORD`
+
+
+## Running the app
+
+```bash
+# development
+$ npm run start
+
+# watch mode
+$ npm run start:dev
+
+# production mode
+$ npm run start:prod
+
+# production mode
+$ npm run start:prod
+```
+
+
+
+
 ## API Reference
 
 ### SIGNUP or Create User
